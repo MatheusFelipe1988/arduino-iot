@@ -1,21 +1,32 @@
-#include "WiFiEsp.h"
-#include "SoftwareSerial.h"
+#include <WiFiEsp.h>
+#include <SoftwareSerial.h>
+#include <BlynkSimpleShieldEsp8266.h>
+
+#define rele 2
+#define ESP8266_BAUD 9600
 
 SoftwareSerial Serial1(6, 7); //pinos que ira colocar no arduino para emular 6 rx e 7 tx
+
+char auth[] = "YourAuthToken";
 
 char ssid[] = "NET_2GE9F4EB";
 char pass[] = "E2E9F4EB";
 
 int status = WL_IDLE_STATUS;
 
-WiFiEspServer server(80);
+//WiFiEspServer server(80);
+ESP8266 wifi(&EspSerial);
 
 RingBuffer buf(8);
 
 int statusled = LOW;
 
 void setup() {
+
+EspSerial.begin(ESP8266_BAUD);
+delay(10);
 pinMode(LED_BUILTIN, OUTPUT); //definindo pino para saida que é o pino 13
+Blynk.begin(auth, wifi, ssid, pass); //paramentros para comunicar o blynk
 digitalWrite(LED_BUILTIN, LOW);// pino 13 inicia off
 Serial.begin(9600);// inicializa o serial
 Serial1.begin(9600); //inicia o modulo
@@ -24,9 +35,9 @@ WiFi.init(&Serial1);// iniciando a comunicação
 if(WiFi.status() == WL_NO_SHIELD){
   while(true);
 }
-while(staus != WL_CONNECTED){
-  status = WiFi.begin(ssid, pass);
-}
+//while(staus != WL_CONNECTED){
+ // status = WiFi.begin(ssid, pass);
+//}
 server.begin();
 }
 
@@ -59,7 +70,12 @@ WiFiEspClient client = server.avaliable();
     client.stop();
   }
 }
+void loop(){
+  Blynk.run();//inicia o app
+  timer.run();//inicia o tempo
+}
 
+/*
 void sendHttpResponse(WiFIEspClient client){
 client.println("HTTP/1.1 200 OK");
   client.println("Content-Type: text/html"); 
@@ -88,5 +104,6 @@ client.println("HTTP/1.1 200 OK");
   client.println("<hr />");
   client.println("</body>");
   client.println("</html>");
-  delay(1);
-}
+  delay(1)
+  }
+  */
